@@ -577,7 +577,7 @@ _./a.out_
 
 ## Lab Assessment - 3
 
-### Yacc program to validate id = expression;
+### Yacc program to validate id = expression
 
 Create a YACC program that uses Context-Free Grammar (CFG) to validatecassignment statements of the form id = expression;. The program should ensure that the assignment follows the correct syntax, including the proper use of identifiers, operators, and the required semicolon at the end
 
@@ -640,6 +640,92 @@ _flex filename.l_
 _bison -d yacc.y_
 _gcc lex.yy.c yacc.tab.c_
 _./a.out_
+
+### CFG to validate Flow Statements
+
+Create a YACC program that uses Context-Free Grammar (CFG) to validate control
+flow statements, specifically:
+● if statements of the form if (Condition) { id = exp; }
+● while statements of the form while (Condition) { id = exp; }
+● for statements of the form for (id = number; Condition; increment/decrement)
+{ id = exp; }
+
+lex.l
+```lex
+%{
+#include "program6.yacc.tab.h"
+%}
+L [a-zA-Z]
+D [0-9]
+KW1 if
+KW2 while
+KW3 for
+ID {L}({L}|{D})*
+NUM {D}+
+ROP "<"|">"|"<="|">="
+COP [{}]
+SOP [;\n]
+PO [()]
+AOP [-+*/=]
+IDOP "++"|"--"
+%%
+{KW1} return(IF);
+{KW2} return(WHILE);
+{KW3} return(FOR);
+{ID} return(IDEN);
+{NUM} return(NUM);
+{ROP} return *yytext;
+{COP} return *yytext;
+{SOP} return *yytext;
+{PO} return *yytext;
+{IDOP} return *yytext;
+{AOP} return *yytext;
+. {yyerror("Invalid");}
+%%
+```
+
+yacc.y
+
+```yacc
+%{
+    #include <stdio.h>
+    #include "program6yacc.tab.h"
+    int yylex(void);
+    void yyerror(char *);
+%}
+%token IDEN NUM IF WHILE FOR
+%%
+P :S'\n'
+S :IF '(' C ')' '{' IDEN '=' E ';' '}' '\n' {printf("IF statement is Validated\n");}
+| WHILE'('C')''{'IDEN'='E';''}''\n' {printf("WHILE statement is Validated\n");}
+| FOR '('IDEN'='NUM';'C';'IDEN IDEO')''{'IDEN'='E';''}''\n'{printf("FOR statement is Validated\n");}
+C :IN OP IN
+E :E'+'T
+|E'-'T
+|T
+T :T'*'F
+|T'/'F
+|F
+F :'('E')'
+|IN
+IN :IDEN|NUM
+OP :'<'
+|'>'
+IDEO : '+''+'
+|'-''-'
+%%
+int main(){
+    printf("Enter the Statement : ");
+    yyparse();
+    return 0;
+}
+int yywrap(){
+    return 1;
+}
+void yyerror(char *s){
+    fprintf(stderr,"%s\n",s);
+}
+```
 
 ## Lab Assessment - 4
 
